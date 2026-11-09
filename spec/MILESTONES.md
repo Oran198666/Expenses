@@ -85,8 +85,17 @@
 
 ---
 
-## Milestone 6: Static Information, Architecture Overview & Final Production Deployment
+## Milestone 6: Static Information, Architecture Overview & Final Production Deployment ✅
 
 - **Name and Purpose:** System Documentation View, Static Pages, and Production Deployment. The objective is to finalize the static information pages, integrate the architectural system overview, and deploy the fully validated application to the Production environment.
 - **Implementation Scope:**
-  - Implement the static **About** screen (`About`) displaying application metadata, developer
+  - Implement the static **About** screen (`About`) displaying application metadata, developer description, and a developer photograph (content supplied by the user during implementation).
+  - Implement the **Architecture Diagram** view (`Architecture Diagram`) showing the database schema entities (Auth User, Expense, Saved Filter) and the infrastructure relationships (centralized Supabase data store, Vercel backend), as in the wireframes and mockups.
+  - Confirm the **Production Supabase project** has every database migration applied (with the user's approval) and that Vercel holds all Production environment variables.
+  - Deploy the final application to **Vercel** through the GitHub push, as defined in ARCHITECTURE.md.
+- **Expected Deliverable:** The complete application live on Vercel, connected to the Production Supabase project, including the About page and the Architecture overview.
+- **Definition of Done:**
+  - The About page shows the static application description, developer description, and developer photograph, in the design system styling and responsive on mobile and desktop.
+  - The Architecture Diagram renders the schema entities and infrastructure relationships legibly on mobile and desktop.
+  - All database migrations are applied to the **Production Supabase project** (after explicit approval) and the Production environment variables are set in Vercel.
+  - The application is deployed to Vercel, the live site is connected to the Production Supabase project, and the main flows (register, log in, add/update/delete an expense, filter, view reports, export CSV/PDF) work on the live site.

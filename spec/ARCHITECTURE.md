@@ -225,3 +225,8 @@ To maintain stability without requiring local Docker environments, configure **t
 **Context:** The PRD asks for "the ability to switch between yearly and monthly detail"; the wireframe and mockup show both charts at once (the wireframe wins on structure).
 **Decision:** Both charts are always visible. The monthly chart shows the 12 months of one selected year, chosen with its own Year dropdown or by clicking a column in the yearly chart; it starts on the latest year with spending.
 **Consequences:** Matches the wireframe while still letting the user move between yearly and monthly detail.
+
+### ADR-19: Architecture Diagram lives on the About page, built from HTML/CSS boxes
+**Context:** DESIGN.md lists an "Architecture Diagram" screen, but the PRD's navigation has only the four main pages (plus Categories). The diagram is static documentation.
+**Decision:** The diagram is a "System Architecture" section at the bottom of the About page, drawn with neon-outlined HTML boxes and icon arrows (no image file, no new package). It follows the wireframe: Auth User → Expense (Category, Amount, Date, Currency) → Saved Filter, and Centralized Supabase Data Store → Vercel Backend. Side by side on wide screens, stacked with downward arrows on phones. The developer photo is a static file in `public/` (`dev.jpg`).
+**Consequences:** The menu stays as the PRD describes; the diagram text stays sharp and readable at any size. Changing the diagram or About content means editing the code (the PRD excludes editing it in the app).
