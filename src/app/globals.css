@@ -145,6 +145,11 @@
     background-position: right 0.875rem center;
   }
 
+  .input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .input[aria-invalid="true"] {
     border-color: var(--color-amber);
     box-shadow: 0 0 6px #ffaa3355;

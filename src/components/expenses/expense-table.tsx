@@ -1,5 +1,6 @@
 "use client";
-// "Recent Expenses" table with sortable headers, row actions and Load More.
+// Expense table with sortable headers. Row actions (Update / Delete) are
+// optional, so the Filters screen reuses it view-only.
 import { ArrowDown, ArrowUp, ArrowUpDown, Pencil, Trash2 } from "lucide-react";
 import type { ExpenseRow } from "@/app/actions/expenses";
 import { formatAmount, type SortDir, type SortKey } from "@/lib/expenses/constants";
@@ -53,10 +54,11 @@ export function ExpenseTable({
   rows: ExpenseRow[];
   sort: { key: SortKey; dir: SortDir };
   onSort: (key: SortKey) => void;
-  editingId: string | null;
-  onEdit: (row: ExpenseRow) => void;
-  onDelete: (row: ExpenseRow) => void;
+  editingId?: string | null;
+  onEdit?: (row: ExpenseRow) => void;
+  onDelete?: (row: ExpenseRow) => void;
 }) {
+  const withActions = Boolean(onEdit && onDelete);
   return (
     // Wide tables scroll sideways inside the card, never the whole page.
     <div className="relative overflow-x-auto">
@@ -75,14 +77,16 @@ export function ExpenseTable({
             <th scope="col" className="hidden md:table-cell">
               Description
             </th>
-            <th scope="col" className="text-right!">
-              <span className="sr-only">Actions</span>
-            </th>
+            {withActions && (
+              <th scope="col" className="text-right!">
+                <span className="sr-only">Actions</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.id} data-editing={row.id === editingId}>
+            <tr key={row.id} data-editing={editingId != null && row.id === editingId}>
               <td className="whitespace-nowrap">{row.date}</td>
               <td className="whitespace-nowrap text-right text-white tabular-nums">
                 {formatAmount(row.amount, row.currency)}
@@ -91,12 +95,13 @@ export function ExpenseTable({
               <td className="hidden max-w-[16rem] truncate md:table-cell" title={row.description ?? ""}>
                 {row.description || <span className="opacity-50">—</span>}
               </td>
+              {withActions && (
               <td>
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     className="btn-sm"
-                    onClick={() => onEdit(row)}
+                    onClick={() => onEdit?.(row)}
                     aria-label={`Update expense ${formatAmount(row.amount, row.currency)} ${row.categoryName} ${row.date}`}
                   >
                     <Pencil aria-hidden size={14} />
@@ -105,7 +110,7 @@ export function ExpenseTable({
                   <button
                     type="button"
                     className="btn-sm btn-danger"
-                    onClick={() => onDelete(row)}
+                    onClick={() => onDelete?.(row)}
                     aria-label={`Delete expense ${formatAmount(row.amount, row.currency)} ${row.categoryName} ${row.date}`}
                   >
                     <Trash2 aria-hidden size={14} />
@@ -113,6 +118,7 @@ export function ExpenseTable({
                   </button>
                 </div>
               </td>
+              )}
             </tr>
           ))}
         </tbody>

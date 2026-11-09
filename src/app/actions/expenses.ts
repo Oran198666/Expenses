@@ -7,10 +7,10 @@ import { addDays, isValidIsoDate, utcToday } from "@/lib/dates";
 import {
   isSortDir,
   isSortKey,
-  PAGE_SIZE,
   type SortDir,
   type SortKey,
 } from "@/lib/expenses/constants";
+import { fetchExpensePage, type ExpenseRow } from "@/lib/expenses/query";
 import {
   validateExpense,
   type ExpenseInput,
@@ -18,15 +18,7 @@ import {
 } from "@/lib/expenses/validation";
 import { GENERIC_ERROR, requireUser } from "@/lib/supabase/session";
 
-export type ExpenseRow = {
-  id: string;
-  amount: number;
-  currency: string;
-  date: string;
-  description: string | null;
-  categoryId: string;
-  categoryName: string;
-};
+export type { ExpenseRow };
 
 export type ListExpensesResult =
   | { ok: true; rows: ExpenseRow[]; hasMore: boolean }
@@ -35,31 +27,6 @@ export type ListExpensesResult =
 export type MutationResult =
   | { ok: true }
   | { ok: false; error?: string; fieldErrors?: FieldErrors };
-
-type DbExpense = {
-  id: string;
-  amount: number | string;
-  currency: string;
-  expense_date: string;
-  description: string | null;
-  category_id: string;
-  category: { name: string } | null;
-};
-
-const EXPENSE_COLUMNS =
-  "id, amount, currency, expense_date, description, category_id, category:categories(name)";
-
-function toRow(e: DbExpense): ExpenseRow {
-  return {
-    id: e.id,
-    amount: Number(e.amount),
-    currency: e.currency,
-    date: e.expense_date,
-    description: e.description,
-    categoryId: e.category_id,
-    categoryName: e.category?.name ?? "",
-  };
-}
 
 function cleanOffset(offset: unknown): number {
   return Number.isInteger(offset) && (offset as number) >= 0 ? (offset as number) : 0;
@@ -72,33 +39,14 @@ export async function listExpenses(
   offset = 0,
 ): Promise<ListExpensesResult> {
   const key = isSortKey(sort) ? sort : "date";
-  const ascending = (isSortDir(dir) ? dir : "desc") === "asc";
+  const order = isSortDir(dir) ? dir : "desc";
   const start = cleanOffset(offset);
 
   try {
     const { supabase } = await requireUser();
-    let query = supabase.from("expenses").select(EXPENSE_COLUMNS);
-
-    if (key === "amount") query = query.order("amount", { ascending });
-    // Sort by the joined category's name.
-    if (key === "category") query = query.order("category(name)", { ascending });
-    // Ties (and the date sort itself) fall back to date, then entry order.
-    const byDate = key === "date" ? ascending : false;
-    query = query
-      .order("expense_date", { ascending: byDate })
-      .order("created_at", { ascending: byDate })
-      .order("id", { ascending: byDate });
-
-    // Ask for one extra row to know whether "Load More" is needed.
-    const { data, error } = await query.range(start, start + PAGE_SIZE);
-    if (error) return { ok: false, error: GENERIC_ERROR };
-
-    const rows = (data as unknown as DbExpense[]).map(toRow);
-    return {
-      ok: true,
-      rows: rows.slice(0, PAGE_SIZE),
-      hasMore: rows.length > PAGE_SIZE,
-    };
+    const page = await fetchExpensePage(supabase, {}, key, order, start);
+    if (!page) return { ok: false, error: GENERIC_ERROR };
+    return { ok: true, ...page };
   } catch (error) {
     unstable_rethrow(error);
     return { ok: false, error: GENERIC_ERROR };

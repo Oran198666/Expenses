@@ -56,7 +56,7 @@
 
 ---
 
-## Milestone 4: Advanced Filtering, Search & Custom Queries
+## Milestone 4: Advanced Filtering, Search & Custom Queries ✅
 
 - **Name and Purpose:** Advanced Filtering and Saved Filters. The objective is to provide an independent workspace to query, filter, and save custom expense views based on built-in or custom parameters.
 - **Implementation Scope:**

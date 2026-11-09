@@ -74,6 +74,10 @@ Step-by-step setup for the Expense Tracker: two Supabase projects (Development a
 - [x] **Development database tables:** supabase.com → **expenses-dev** → **SQL Editor** → **New query** → paste the whole file `supabase/migrations/0002_categories_expenses.sql` → **Run**. You should see a small result table (one empty row per existing user) or "Success". This also gives every existing user the 10 starting categories.
 - [x] **Production (only at push time, after approval):** run the same SQL in **expenses-prod**. (Done 2026-11-09.)
 
+## 9. Milestone 4 — saved filters
+- [x] **Development database table:** supabase.com → **expenses-dev** → **SQL Editor** → **New query** → paste the whole file `supabase/migrations/0003_saved_filters.sql` → **Run**. You should see "Success. No rows returned".
+- [x] **Production (only at push time, after approval):** run the same SQL in **expenses-prod**. (Done 2026-11-09.)
+
 ## Rules going forward
 - Database changes (new tables etc.) are always tried on **Development** first.
 - They go to **Production** only after your approval, and before the matching code goes live.

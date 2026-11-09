@@ -200,3 +200,13 @@ To maintain stability without requiring local Docker environments, configure **t
 **Context:** RLS stops users from reading other users' categories, but a plain foreign key would still let an expense point at another user's category id. Categories in use must not be deletable.
 **Decision:** `expenses (category_id, user_id)` references `categories (id, user_id)` with `on delete restrict`.
 **Consequences:** The database itself rejects cross-user categories and deleting a used category. The app checks the count first to show a friendly reason ("Used by N expenses — move or delete them first.").
+
+### ADR-14: Filter criteria combine (AND) in one panel; saved filters store every filled-in field as JSON
+**Context:** The PRD describes built-in filters (year / month / day / max amount) and custom filters (date range + keyword) and calls custom filters an "alternative", but the wireframe shows both in one panel. The PRD only mentions saving custom filters.
+**Decision:** One panel; every filled-in criterion narrows the results further (AND). A saved filter stores all filled-in fields in `saved_filters.filter_criteria` (JSONB object: `year, month, day, maxAmount, startDate, endDate, keyword`, empty ones left out). The server re-validates criteria on every search and when loading saved filters; broken entries are skipped. Saved filter names are 1–40 characters, unique per user ignoring case (database index). The data model's `created_z` column is implemented as `created_at`. Keyword search is a case-insensitive literal match done with an escaped regular expression (`imatch`), because the database API turns `*` into a wildcard in LIKE patterns.
+**Consequences:** Users can mix built-in and custom criteria freely. Max amount compares the number only, across currencies (no conversion). Renaming or deleting saved filters is not available (not in the PRD).
+
+### ADR-15: One shared server-side query builder for the Home and Filters tables
+**Context:** Both tables need the same sorting (date, amount, category; both directions), the same tie-breaking and the same 25-row Load More, but must stay independent.
+**Decision:** `src/lib/expenses/query.ts` (`fetchExpensePage`) builds the query for both. Home calls it with no criteria; Filters passes its criteria. Each screen keeps its own state and requests.
+**Consequences:** Sorting and paging behave identically on both screens and are changed in one place.
