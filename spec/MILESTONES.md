@@ -8,7 +8,7 @@
 
 ---
 
-## Milestone 1: Project Setup, Environment Configuration & Dual Supabase Strategy
+## Milestone 1: Project Setup, Environment Configuration & Dual Supabase Strategy 🟡
 
 - **Name and Purpose:** Project Initialization and Environment Setup. The objective is to initialize the Next.js and Tailwind CSS project framework, configure hosting on Vercel, and establish the dual-project Supabase strategy (Development and Production projects) with step-by-step guidance.
 - **Implementation Scope:** 

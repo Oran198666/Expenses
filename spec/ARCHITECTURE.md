@@ -132,3 +132,31 @@ To maintain stability without requiring local Docker environments, configure **t
 2.  Migrations are first applied and thoroughly tested against the **Development** Supabase project.
 3.  Upon user approval, the migration is applied to the **Production** Supabase project before deploying the corresponding frontend/backend code update via Vercel.
 4.  *Note:* Settings such as Auth providers, email templates, file storage policies, and secrets are not carried over by SQL migrations and must be manually mirrored across both Supabase projects.
+---
+
+## Key decisions (ADRs)
+
+### ADR-1: Same environment variable names for Development and Production
+**Context:** The app needs to talk to the Development Supabase project locally and to the Production project on Vercel.
+**Decision:** Use one set of names (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_APP_ENV`). The local `.env` holds the Development values; Vercel's Environment Variables hold the Production values. The `SUPABASE_DEV_*` / `SUPABASE_PROD_*` names above are labels for the two projects, not variable names.
+**Consequences:** Production keys never exist on the developer machine; code has no Dev/Prod branching. `NEXT_PUBLIC_APP_ENV` makes the active project visible on the status card.
+
+### ADR-2: `.env` instead of `.env.local`
+**Context:** This document mentions `.env.local`; the project rules (CLAUDE.md) use `.env` copied from `.env.example`.
+**Decision:** Use `.env`. Next.js loads both files and both are git-ignored.
+**Consequences:** One local settings file; `.env.example` lists the names without values.
+
+### ADR-3: Free fonts instead of "Star Sans Pro"
+**Context:** The style guide's font "Star Sans Pro" is not available as a free web font.
+**Decision:** Use Google Fonts via `next/font`: **Orbitron** for H1/H2 headings and **Exo 2** for body text.
+**Consequences:** Similar geometric/retro look, no licensing cost, fonts are self-hosted by Next.js. Can be swapped later in `src/app/layout.tsx`.
+
+### ADR-4: Tailwind v4 theme tokens in CSS
+**Context:** The project uses Tailwind CSS v4 (from `create-next-app`, Next.js 16).
+**Decision:** Theme colors, radius and fonts are defined with `@theme` in `src/app/globals.css`, plus shared component classes (`.card`, `.btn-primary`, `.btn-secondary`, `.input`, `.label`, `.glow-text`). No `tailwind.config` file.
+**Consequences:** One place to change the "Galactic Odyssey" look; later screens reuse the same classes.
+
+### ADR-5: Supabase connection check via the Auth health endpoint
+**Context:** Milestone 1 must prove the Supabase connection before any tables exist.
+**Decision:** `GET /api/health` and the home status card call `{SUPABASE_URL}/auth/v1/health` with the publishable key.
+**Consequences:** Verifies both the address and the key without a database schema. The status card is temporary and will be replaced by the real Home screen.
