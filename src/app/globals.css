@@ -171,4 +171,191 @@
     font-size: 0.875rem;
     color: var(--color-silver);
   }
+
+  /* ---------- Milestone 3: tables, small buttons, dialog, side menu ---------- */
+
+  .btn-primary:disabled,
+  .btn-secondary:disabled,
+  .btn-sm:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .btn-primary[aria-busy="true"] {
+    cursor: wait;
+  }
+
+  .btn-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    padding: 0.2rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    border: 1px solid var(--color-cyan);
+    color: var(--color-cyan);
+    box-shadow: 0 0 6px #00ffff33;
+    transition:
+      box-shadow 150ms,
+      background-color 150ms;
+  }
+
+  .btn-sm:hover:not(:disabled) {
+    background-color: #00ffff14;
+    box-shadow: 0 0 10px #00ffff77;
+  }
+
+  .btn-danger {
+    border-color: var(--color-neon-pink);
+    color: var(--color-neon-pink);
+    box-shadow: 0 0 6px #ff66ff33;
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    background-color: #ff66ff14;
+    box-shadow: 0 0 10px #ff66ff77;
+  }
+
+  .btn-sm:focus-visible,
+  .sort-btn:focus-visible,
+  .nav-link:focus-visible,
+  .list-item:focus-visible {
+    outline: 2px solid var(--color-cyan);
+    outline-offset: 2px;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+
+  .data-table th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--color-neon-pink);
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid #ff66ff66;
+    white-space: nowrap;
+  }
+
+  .data-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #4c1c7399;
+    vertical-align: middle;
+  }
+
+  .data-table tbody tr:hover {
+    background-color: #4c1c7333;
+  }
+
+  .data-table tr[data-editing="true"] {
+    background-color: #00ffff12;
+  }
+
+  .sort-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: inherit;
+    font-weight: inherit;
+    border-radius: 4px;
+  }
+
+  .sort-btn:hover {
+    color: var(--color-cyan);
+  }
+
+  .confirm-dialog {
+    margin: auto;
+    width: min(28rem, calc(100vw - 2rem));
+    color: var(--color-silver);
+    background-color: var(--color-panel);
+    padding: 1.5rem;
+  }
+
+  .confirm-dialog::backdrop {
+    background-color: #0a1128cc;
+    backdrop-filter: blur(2px);
+  }
+
+  .nav-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: var(--radius-card);
+    padding: 0.625rem 0.875rem;
+    color: var(--color-silver);
+    transition:
+      background-color 150ms,
+      color 150ms;
+  }
+
+  .nav-link:hover {
+    background-color: #4c1c7355;
+    color: #ffffff;
+  }
+
+  .nav-link[aria-current="page"] {
+    background-color: #4c1c7399;
+    color: #ffffff;
+  }
+
+  /* Cyan bar on the left and a pink dot on the right, as in the style guide. */
+  .nav-link[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.375rem;
+    bottom: 0.375rem;
+    width: 3px;
+    border-radius: 2px;
+    background-color: var(--color-cyan);
+    box-shadow: 0 0 8px var(--color-cyan);
+  }
+
+  .nav-link[aria-current="page"]::after {
+    content: "";
+    margin-left: auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background-color: var(--color-neon-pink);
+    box-shadow: 0 0 8px var(--color-neon-pink);
+  }
+
+  .list-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #4c1c7399;
+    text-align: left;
+    color: var(--color-silver);
+  }
+
+  .list-item:hover {
+    background-color: #4c1c7355;
+  }
+
+  .list-item[aria-selected="true"] {
+    background-color: #4c1c73aa;
+    color: #ffffff;
+    box-shadow: inset 3px 0 0 var(--color-cyan);
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    border-radius: 9999px;
+    padding: 0 0.5rem;
+    border: 1px solid #c0c0c066;
+    color: #c0c0c0cc;
+    white-space: nowrap;
+  }
 }

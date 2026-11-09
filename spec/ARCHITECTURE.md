@@ -180,3 +180,23 @@ To maintain stability without requiring local Docker environments, configure **t
 **Context:** Security answers are secrets and must not be stored in plain text.
 **Decision:** Answers are normalized (trimmed, spaces collapsed, lowercase) and stored as a salted scrypt hash using Node's built-in `crypto`. In the database, `anon`/`authenticated` roles can read only `id, username, security_question, created_at` of their own row; the hash is read only on the server with the secret key.
 **Consequences:** No extra packages. Answers are case-insensitive. The security question list is fixed in `src/lib/auth/questions.ts`.
+
+### ADR-10: "Other" description rule enforced in the app by category name
+**Context:** The PRD requires a description when the category is **Other**, and categories can be renamed.
+**Decision:** The rule follows the category's current name ("other", case-insensitive, trimmed). It is checked in the browser and again in the Server Action, which looks up the category's name. The database doesn't enforce it, because a check constraint can't read another table.
+**Consequences:** Renaming "Other" removes the rule; naming a category "Other" adds it. The database still enforces amount, currency, date and description length.
+
+### ADR-11: "Today" is the browser's local date, with a UTC+1 day safety limit
+**Context:** The database clock is UTC, but the user lives in Israel (UTC+2/+3). Between midnight and ~3 a.m. local time, UTC is still "yesterday", so a plain `expense_date <= current_date` check would reject today's expenses.
+**Decision:** The browser sends its local "today" with each save; the server rejects dates after it (accepting the browser's date only if it is within one day of UTC today). The database check is `expense_date <= current_date + 1` as a safety net. The form's Date defaults to the browser's today.
+**Consequences:** Correct in every time zone; at most one day of tolerance at the database level. This differs from the `<= current_date` written in the data model above.
+
+### ADR-12: Predefined categories seeded per user by a database trigger (once)
+**Context:** Every user must start with the 10 PRD categories, and they can be renamed or deleted like any other.
+**Decision:** A trigger on `profiles` insert calls `seed_default_categories`, which inserts the 10 names (`is_predefined = true`) with `created_at` staggered by 1 ms to keep the PRD order. The migration also seeds users that already existed.
+**Consequences:** No app code needed at registration. Seeding happens once: deleted predefined categories stay deleted. Lists are ordered by creation time, so new categories appear at the end.
+
+### ADR-13: Composite foreign key ties each expense's category to the same user
+**Context:** RLS stops users from reading other users' categories, but a plain foreign key would still let an expense point at another user's category id. Categories in use must not be deletable.
+**Decision:** `expenses (category_id, user_id)` references `categories (id, user_id)` with `on delete restrict`.
+**Consequences:** The database itself rejects cross-user categories and deleting a used category. The app checks the count first to show a friendly reason ("Used by N expenses — move or delete them first.").

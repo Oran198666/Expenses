@@ -40,7 +40,7 @@
 
 ---
 
-## Milestone 3: Core Expense Management (Vertical Slice)
+## Milestone 3: Core Expense Management (Vertical Slice) ✅
 
 - **Name and Purpose:** Core Expense Tracking and CRUD Operations. The objective is to deliver the central expense management hub where users can create, read, update, delete, and view paginated expense records linked to categories.
 - **Implementation Scope:**
