@@ -70,7 +70,7 @@
 
 ---
 
-## Milestone 5: Reporting, Analytics & Data Export
+## Milestone 5: Reporting, Analytics & Data Export ✅
 
 - **Name and Purpose:** Financial Reports and Data Export. The objective is to deliver visual spending analytics, charts, and data export capabilities.
 - **Implementation Scope:**

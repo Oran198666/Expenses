@@ -210,3 +210,18 @@ To maintain stability without requiring local Docker environments, configure **t
 **Context:** Both tables need the same sorting (date, amount, category; both directions), the same tie-breaking and the same 25-row Load More, but must stay independent.
 **Decision:** `src/lib/expenses/query.ts` (`fetchExpensePage`) builds the query for both. Home calls it with no criteria; Filters passes its criteria. Each screen keeps its own state and requests.
 **Consequences:** Sorting and paging behave identically on both screens and are changed in one place.
+
+### ADR-16: Report totals are calculated on the server, one currency at a time
+**Context:** The PRD forbids adding amounts from different currencies together, and the Reports charts need totals by category, year and month for the chosen currency, date range and category.
+**Decision:** The `getReport` Server Action reads only the matching rows (always filtered by one currency) in batches of 1,000 and adds them up on the server in cents, skipping any row in another currency as a safety net. The yearly series fills gaps between the first and last year with 0; monthly totals are returned only for months with spending and the browser fills the 12 months of the selected year (future months left out). The starting currency is the one the user has the most expenses in (ILS if none).
+**Consequences:** No database changes or SQL functions are needed and currencies can never mix. Every selector change sends one request; fine for a personal expense list, but very large histories would be slower than a database-side sum.
+
+### ADR-17: Exports are built in the browser with papaparse, jspdf and jspdf-autotable
+**Context:** ARCHITECTURE.md names `jspdf` and `papaparse`. A PDF table with page breaks and repeated headers is a lot of hand-written code with plain `jspdf`.
+**Decision:** A Server Action (`getExportRows`) returns the rows (all expenses, or those matching the report filters); the browser builds the file and starts the download. CSV: UTF-8 with a BOM (so Excel reads it correctly), amounts as plain numbers with 2 decimals, and text cells starting with `=`, `+`, `-`, `@` prefixed with `'` so spreadsheets can't run them as formulas. PDF: `jspdf` + `jspdf-autotable` (loaded only when a PDF is requested), with a title, creation date, scope line, the table, totals per currency (never combined) and page numbers. Amounts in the PDF use the currency code (e.g. "ILS 23.71") because the built-in PDF font can't draw symbols like ₪.
+**Consequences:** One extra small package (`jspdf-autotable`). The built-in PDF font only covers Latin text, so descriptions written in Hebrew or other non-Latin scripts won't display correctly in the PDF (the CSV is fine); fixing that would mean embedding a font file.
+
+### ADR-18: Yearly and monthly charts are both always shown
+**Context:** The PRD asks for "the ability to switch between yearly and monthly detail"; the wireframe and mockup show both charts at once (the wireframe wins on structure).
+**Decision:** Both charts are always visible. The monthly chart shows the 12 months of one selected year, chosen with its own Year dropdown or by clicking a column in the yearly chart; it starts on the latest year with spending.
+**Consequences:** Matches the wireframe while still letting the user move between yearly and monthly detail.

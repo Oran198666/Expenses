@@ -363,4 +363,12 @@
     color: #c0c0c0cc;
     white-space: nowrap;
   }
+
+  /* ---------- Milestone 5: charts ---------- */
+
+  /* Recharts focuses the chart on click; show the ring for keyboard users only. */
+  .recharts-wrapper:focus:not(:focus-visible),
+  .recharts-surface:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
