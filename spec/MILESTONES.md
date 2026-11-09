@@ -24,7 +24,7 @@
 
 ---
 
-## Milestone 2: User Authentication & Security Flow
+## Milestone 2: User Authentication & Security Flow ✅
 
 - **Name and Purpose:** User Authentication and Account Security. The objective is to implement secure user registration, login, and password management capabilities backed by Supabase Auth and PostgreSQL database schemas.
 - **Implementation Scope:**

@@ -3,6 +3,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getEnv } from "@/lib/env";
+import { toSessionCookie } from "@/lib/supabase/cookies";
 
 export async function createClient() {
   const { supabaseUrl, supabaseKey } = getEnv();
@@ -16,11 +17,11 @@ export async function createClient() {
       setAll(cookiesToSet) {
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
+            cookieStore.set(name, value, toSessionCookie(options)),
           );
         } catch {
           // Called from a Server Component, where cookies are read-only.
-          // Safe to ignore once session refresh is handled elsewhere (Milestone 2).
+          // The proxy (src/proxy.ts) refreshes the session instead.
         }
       },
     },

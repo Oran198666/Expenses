@@ -11,8 +11,9 @@ Step-by-step setup for the Expense Tracker: two Supabase projects (Development a
 | `NEXT_PUBLIC_SUPABASE_URL` | Address of the Supabase project | Development project URL | Production project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Public key of the project | Development publishable key | Production publishable key |
 | `NEXT_PUBLIC_APP_ENV` | Label shown on the status card | `development` | `production` |
+| `SUPABASE_SECRET_KEY` | **Server-only** key for creating accounts and password recovery | Development secret key | Production secret key |
 
-> Never put the **secret** / **service_role** key anywhere — this app doesn't need it.
+> The **secret** key (`sb_secret_…`) is allowed **only** under the name `SUPABASE_SECRET_KEY` (no `NEXT_PUBLIC_` in front), only in `.env` and in Vercel. Never paste it anywhere else, never share it, and never put it in GitHub. The `NEXT_PUBLIC_` prefix would send it to the browser — don't use it for this key.
 
 ---
 
@@ -63,6 +64,11 @@ Step-by-step setup for the Expense Tracker: two Supabase projects (Development a
 - [x] The **System Status** card should say ✅ **Connected to Supabase (Production)** with the **prod** project ID (different from the dev one).
 
 ---
+
+## 7. Milestone 2 — login and accounts
+- [x] **Development secret key:** supabase.com → **expenses-dev** → **Project Settings → API Keys** → under **Secret keys** click the copy icon (starts with `sb_secret_…`). In `.env` add a new line: `SUPABASE_SECRET_KEY=<the key>`. Save. (If the app is running, restart it.)
+- [x] **Development database table:** supabase.com → **expenses-dev** → **SQL Editor** → **New query** → paste the whole file `supabase/migrations/0001_profiles.sql` → **Run**. You should see "Success. No rows returned".
+- [x] **Production (only at push time, after approval):** run the same SQL in **expenses-prod**, and add `SUPABASE_SECRET_KEY` with the **prod** secret key in Vercel → Project → **Settings → Environment Variables**, then redeploy.
 
 ## Rules going forward
 - Database changes (new tables etc.) are always tried on **Development** first.

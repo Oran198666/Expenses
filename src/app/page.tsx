@@ -1,9 +1,44 @@
-// Temporary placeholder home page (Milestone 1). It shows the theme and
-// whether the app can reach its Supabase project. Replaced in later milestones.
+// Temporary signed-in home page (Milestone 2). Shows who is signed in, the
+// Supabase connection status, and account actions. Replaced by the real Home
+// screen with the side menu in Milestone 3.
 import { Suspense } from "react";
+import Link from "next/link";
 import { connection } from "next/server";
-import { CircleAlert, CircleCheck, Loader, Plus, Rocket } from "lucide-react";
+import {
+  CircleAlert,
+  CircleCheck,
+  KeyRound,
+  Loader,
+  LogOut,
+  Rocket,
+} from "lucide-react";
+import { logout } from "@/app/actions/auth";
 import { checkSupabase } from "@/lib/supabase/health";
+import { createClient } from "@/lib/supabase/server";
+
+async function Welcome() {
+  // Per-user data: always render at request time.
+  await connection();
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  let username: string | null = null;
+  if (userData.user) {
+    // Reads the user's own profile row through Row Level Security.
+    const { data } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", userData.user.id)
+      .maybeSingle();
+    username = data?.username ?? null;
+  }
+
+  return (
+    <p className="mt-4 text-lg">
+      Welcome{username ? ", " : ""}
+      {username && <span className="text-white">{username}</span>}!
+    </p>
+  );
+}
 
 async function SupabaseStatus() {
   // Check at request time so the page always shows the live status.
@@ -42,12 +77,29 @@ export default function Home() {
       <header className="mb-10 text-center">
         <Rocket aria-hidden className="mx-auto mb-4 text-neon-pink" size={40} />
         <h1 className="glow-text text-3xl sm:text-5xl">Expense Tracker</h1>
-        <p className="mt-4">
-          Track your expenses across all your devices. Setup in progress.
-        </p>
+        <Suspense fallback={<p className="mt-4 text-lg">Welcome!</p>}>
+          <Welcome />
+        </Suspense>
+        <p className="mt-2">Expense tracking arrives in the next milestone.</p>
       </header>
 
       <section className="card mb-6 p-6">
+        <h2 className="mb-4 text-neon-pink">Account</h2>
+        <div className="flex flex-wrap gap-4">
+          <Link href="/change-password" className="btn-primary">
+            <KeyRound aria-hidden size={18} />
+            Change Password
+          </Link>
+          <form action={logout}>
+            <button type="submit" className="btn-secondary">
+              <LogOut aria-hidden size={18} />
+              Log Out
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section className="card p-6">
         <h2 className="mb-4 text-neon-pink">System Status</h2>
         <Suspense
           fallback={
@@ -59,46 +111,6 @@ export default function Home() {
         >
           <SupabaseStatus />
         </Suspense>
-      </section>
-
-      {/* Style preview of the shared form controls (not functional yet) */}
-      <section className="card p-6">
-        <h2 className="mb-4 text-neon-pink">Style Preview</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="preview-amount" className="label">
-              Amount
-            </label>
-            <input
-              id="preview-amount"
-              className="input"
-              placeholder="0.00"
-              inputMode="decimal"
-            />
-          </div>
-          <div>
-            <label htmlFor="preview-description" className="label">
-              Description
-            </label>
-            <input
-              id="preview-description"
-              className="input"
-              placeholder="Description"
-            />
-          </div>
-        </div>
-        <div className="mt-6 flex flex-wrap gap-4">
-          <button type="button" className="btn-primary">
-            <Plus aria-hidden size={18} />
-            Add Expense
-          </button>
-          <button type="button" className="btn-secondary">
-            Back
-          </button>
-        </div>
-        <p className="mt-4 text-sm text-amber">
-          Preview only — expenses arrive in a later milestone.
-        </p>
       </section>
     </main>
   );

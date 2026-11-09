@@ -160,3 +160,23 @@ To maintain stability without requiring local Docker environments, configure **t
 **Context:** Milestone 1 must prove the Supabase connection before any tables exist.
 **Decision:** `GET /api/health` and the home status card call `{SUPABASE_URL}/auth/v1/health` with the publishable key.
 **Consequences:** Verifies both the address and the key without a database schema. The status card is temporary and will be replaced by the real Home screen.
+
+### ADR-6: Usernames mapped to internal emails in Supabase Auth
+**Context:** The PRD asks for username + password login, but Supabase Auth signs in with an email (or phone).
+**Decision:** Each username (3–30 characters: letters, digits, `.`, `_`, `-`; stored lowercase) becomes the internal address `<username>@users.expenses.invalid`. `.invalid` is a reserved domain, so it can never be a real mailbox. The user never sees it. The username is also stored in `profiles.username` (unique).
+**Consequences:** Supabase Auth handles password hashing and sessions unchanged. No emails are ever sent; password recovery uses the security question instead of email.
+
+### ADR-7: Server-only secret key for account creation and password recovery
+**Context:** Password recovery must set a new password without the old one, which needs admin rights in Supabase Auth. Creating accounts with admin rights also avoids the email-confirmation step.
+**Decision:** A server-only variable `SUPABASE_SECRET_KEY` (no `NEXT_PUBLIC_` prefix) is used only in `src/lib/supabase/admin.ts`, which is marked `server-only`. Registration uses `auth.admin.createUser` (email pre-confirmed), recovery uses `auth.admin.updateUserById`.
+**Consequences:** The key must be set in `.env` (Development) and in Vercel (Production). It never reaches the browser. Supabase's "Confirm email" setting doesn't affect this app.
+
+### ADR-8: Browser-session auth cookies
+**Context:** The PRD requires that authentication ends when the browser session ends.
+**Decision:** Supabase auth cookies are written without `maxAge` / `expires` (helper `toSessionCookie` in `src/lib/supabase/cookies.ts`, used by the server client and `src/proxy.ts`). `src/proxy.ts` (Next.js 16's name for Middleware) refreshes the session and redirects signed-out visitors to `/login`.
+**Consequences:** Closing the browser signs the user out. Some browsers that "continue where you left off" may restore session cookies; that is browser behavior outside the app's control.
+
+### ADR-9: Security answers hashed with scrypt; hash hidden from clients
+**Context:** Security answers are secrets and must not be stored in plain text.
+**Decision:** Answers are normalized (trimmed, spaces collapsed, lowercase) and stored as a salted scrypt hash using Node's built-in `crypto`. In the database, `anon`/`authenticated` roles can read only `id, username, security_question, created_at` of their own row; the hash is read only on the server with the secret key.
+**Consequences:** No extra packages. Answers are case-insensitive. The security question list is fixed in `src/lib/auth/questions.ts`.
